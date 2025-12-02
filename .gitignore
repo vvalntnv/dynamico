@@ -1,0 +1,119 @@
+########################
+# OS / Editor cruft
+########################
+.DS_Store
+Thumbs.db
+
+# Vim / Neovim swap/backup
+*.swp
+*.swo
+*~
+Session.vim
+
+# VSCode / JetBrains
+.vscode/
+.idea/
+
+########################
+# Env & secrets
+########################
+.env
+.env.*
+!.env.example
+
+# Local config / credentials (adjust if you decide to commit some)
+*.local.json
+*.secret.json
+
+########################
+# Logs
+########################
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+########################
+# Node / TypeScript (Anchor tests, scripts, etc.)
+########################
+node_modules/
+dist/
+build/
+.cache/
+.nyc_output/
+coverage/
+*.tsbuildinfo
+
+########################
+# Rust / Anchor / Solana
+########################
+
+# Build artifacts
+target/
+
+# Anchor workspace metadata & local config
+.anchor/
+
+# Local Solana CLI data (keep global, ignore in project)
+.solana/
+
+# BPF shared objects (normally only in target/, but just in case)
+*.so
+
+# Rust backup files
+**/*.rs.bk
+
+########################
+# Python backend (FastAPI, etc.)
+########################
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+htmlcov/
+
+# Type checking / tooling
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pyrightcache/
+.dmypy.json
+
+# Jupyter stuff (if you use it)
+.ipynb_checkpoints/
+
+########################
+# Misc
+########################
+# Local scripts output, tmp files
+tmp/
+temp/
+*.tmp
+*.bak
+

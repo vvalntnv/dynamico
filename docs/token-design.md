@@ -32,3 +32,14 @@ Fee receiver:
 - Fees are sent automatically by Token-2022 to the Treasury ATA on each transfer.
 - Backend `/admin/set_fee` endpoint will be used to adjust BPS and max fee over time.
 
+
+(method) def create_mint(
+    conn: AsyncClient,
+    payer: Keypair,
+    mint_authority: Pubkey,
+    decimals: int,
+    program_id: Pubkey,
+    freeze_authority: Pubkey | None = None,
+    skip_confirmation: bool = False,
+    recent_blockhash: Hash | None = None
+) -> CoroutineType[Any, Any, AsyncToken]

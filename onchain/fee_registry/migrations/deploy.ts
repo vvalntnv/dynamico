@@ -3,6 +3,7 @@
 // configured from the workspace's Anchor.toml.
 
 import * as anchor from "@coral-xyz/anchor";
+import * as token2022 from "@solana-program/token";
 
 module.exports = async function (provider: anchor.AnchorProvider) {
   // Configure client to use the provider.

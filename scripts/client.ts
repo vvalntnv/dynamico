@@ -1,10 +1,16 @@
 import {
   airdropFactory,
   appendTransactionMessageInstruction,
-  BaseTransactionMessage,
   sendAndConfirmTransactionFactory,
   generateKeyPairSigner,
   lamports,
+} from "@solana/kit";
+
+import { loadLocalWallet } from "@/wallet";
+import { RPC_URL, RPC_WEBSOCKET_URL } from "./constants";
+
+import type {
+  BaseTransactionMessage,
   MessageSigner,
   Rpc,
   RpcSubscriptions,
@@ -13,7 +19,6 @@ import {
   TransactionMessageWithFeePayer,
   TransactionSigner,
 } from "@solana/kit";
-
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import {
   estimateComputeUnitLimitFactory,
@@ -53,11 +58,9 @@ export type Client = {
 let client: Client | undefined;
 export async function createClient(): Promise<Client> {
   if (!client) {
-    const signer = await generateKeyPairSigner();
-    const rpc = createSolanaRpc("http://127.0.0.1:8899");
-    const rpcSubscriptions = createSolanaRpcSubscriptions(
-      "ws://127.0.0.1:8900",
-    );
+    const signer = await loadLocalWallet();
+    const rpc = createSolanaRpc(RPC_URL);
+    const rpcSubscriptions = createSolanaRpcSubscriptions(RPC_WEBSOCKET_URL);
 
     const airdrop = airdropFactory({ rpc, rpcSubscriptions });
     const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({

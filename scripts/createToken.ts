@@ -1,11 +1,16 @@
 import * as solana from "@solana/kit";
-import { createClient } from "./client";
-import type { Client } from "./client";
-import { getInitializeMintInstruction } from "@solana-program/token";
-import { extension, getMintSize } from "@solana-program/token-2022";
+import { createClient } from "@/client";
+import type { Client } from "@/client";
+import { findAssociatedTokenPda } from "@solana-program/token";
+import {
+  extension,
+  getCreateAssociatedTokenInstruction,
+  getMintSize,
+} from "@solana-program/token-2022";
 import { getCreateAccountInstruction } from "@solana-program/system";
 import {
   getInitializeTransferFeeConfigInstruction,
+  getInitializeMintInstruction,
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
 
@@ -17,12 +22,31 @@ async function main() {
 
 async function createMint(client: Client) {
   const mint = await solana.generateKeyPairSigner();
+  console.log("minter data: ", mint.address);
 
   const transferFees = {
     epoch: 0,
     transferFeeBasisPoints: 50,
     maximumFee: 50_000_000n,
   };
+
+  const [treasuryAccountAddress, bump] = await findAssociatedTokenPda({
+    mint: mint.address,
+    owner: client.wallet.address,
+    tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
+  });
+
+  console.log(
+    `Treasury account data: ${treasuryAccountAddress.toString()}. ` +
+      `And the bump :p ${bump.toString()}`,
+  );
+
+  const createTreasureIx = getCreateAssociatedTokenInstruction({
+    payer: client.wallet,
+    mint: mint.address,
+    owner: client.wallet.address,
+    ata: treasuryAccountAddress,
+  });
 
   const ext = extension("TransferFeeConfig", {
     transferFeeConfigAuthority: client.wallet.address,
@@ -37,6 +61,7 @@ async function createMint(client: Client) {
     .getMinimumBalanceForRentExemption(BigInt(mintSize))
     .send();
 
+  console.log("Mint rent: ", mintRent);
   const createAccIx = getCreateAccountInstruction({
     payer: client.wallet,
     newAccount: mint,
@@ -47,8 +72,8 @@ async function createMint(client: Client) {
 
   const initializeTransactionFeeIx = getInitializeTransferFeeConfigInstruction({
     mint: mint.address,
-    withdrawWithheldAuthority: client.wallet.address,
-    transferFeeConfigAuthority: client.wallet.address,
+    withdrawWithheldAuthority: ext.withdrawWithheldAuthority,
+    transferFeeConfigAuthority: ext.transferFeeConfigAuthority,
     transferFeeBasisPoints: ext.newerTransferFee.transferFeeBasisPoints,
     maximumFee: ext.newerTransferFee.maximumFee,
   });
@@ -71,7 +96,12 @@ async function createMint(client: Client) {
       solana.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
     (tx) =>
       solana.appendTransactionMessageInstructions(
-        [createAccIx, initializeTransactionFeeIx, initializeMintIx],
+        [
+          createAccIx,
+          initializeTransactionFeeIx,
+          initializeMintIx,
+          createTreasureIx,
+        ],
         tx,
       ),
     (tx) => client.estimateAndSetComputeUnitLimit(tx),
@@ -87,6 +117,9 @@ async function createMint(client: Client) {
     commitment: "confirmed",
   });
 
+  const transactionSignature = solana.getSignatureFromTransaction(transaction);
+
+  console.log("Tx signature", transactionSignature);
   console.log("The mint address is: ", mint.address);
 }
 

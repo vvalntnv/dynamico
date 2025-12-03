@@ -5,13 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx src/index.ts",
+    "createToken": "tsx ./createToken.ts",
+    "mintTokens": "tsx ./mintTokens.ts",
+	"transferTokens": "tsx ./transferTokens.ts",
+    "debug": "node --inspect-brk ./node_modules/tsx/dist/cli.mjs ./createToken.ts",
+    "build": "tsc",
     "validator": "solana-test-validator"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@solana-program/compute-budget": "^0.11.0",
     "@solana-program/memo": "^0.10.0",
@@ -20,5 +24,10 @@
     "@solana-program/token-2022": "^0.6.1",
     "@solana/kit": "^5.0.0",
     "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@solana/errors": "^5.0.0",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
   }
 }

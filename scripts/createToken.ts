@@ -1,9 +1,16 @@
-import * as solana from "@solana/kit";
 import { createClient } from "./client";
-import { getCreateAccountInstruction } from "@solana-program/system";
+import { createMint } from "./mint/createMint";
 
-main();
-
+/**
+ * Main script: Creates a Solana token (mint) with transfer fees
+ */
 async function main() {
   const client = await createClient();
+
+  const mintAddress = await createMint(client);
+
+  console.log("Token created successfully!");
+  console.log("Mint address:", mintAddress);
 }
+
+main();

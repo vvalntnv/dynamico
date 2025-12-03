@@ -1,45 +1,55 @@
 import {
-  airdropFactory,
-  generateKeyPairSigner,
-  lamports,
-  MessageSigner,
-  Rpc,
-  RpcSubscriptions,
-  SolanaRpcApi,
-  SolanaRpcSubscriptionsApi,
-  TransactionSigner,
+  type Rpc,
+  type RpcSubscriptions,
+  type SolanaRpcApi,
+  type SolanaRpcSubscriptionsApi,
+  type TransactionSigner,
+  type MessageSigner,
+  sendAndConfirmTransactionFactory,
 } from "@solana/kit";
+import { createConnections } from "./rpc/connections";
+import { createAndFundWallet } from "./wallet/createWallet";
+import { createComputeUnitEstimator } from "./transactions/computeUnits";
+import { createTransactionSender } from "./transactions/sender";
 
-import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
-
+/**
+ * The client holds all the tools needed to interact with Solana
+ */
 export type Client = {
+  estimateAndSetComputeUnitLimit: ReturnType<typeof createComputeUnitEstimator>;
+  sendAndConfirmTransaction: ReturnType<typeof createTransactionSender>;
   rpc: Rpc<SolanaRpcApi>;
   rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
   wallet: TransactionSigner & MessageSigner;
 };
 
 let client: Client | undefined;
+
+/**
+ * Creates a Solana client with wallet, RPC connections, and utilities
+ */
 export async function createClient(): Promise<Client> {
-  if (!client) {
-    const signer = await generateKeyPairSigner();
-    const rpc = createSolanaRpc("http://127.0.0.1:8899");
-    const rpcSubscriptions = createSolanaRpcSubscriptions(
-      "ws://127.0.0.1:8900",
-    );
-
-    const airdrop = airdropFactory({ rpc, rpcSubscriptions });
-
-    await airdrop({
-      recipientAddress: signer.address,
-      lamports: lamports(100_000_000_000n),
-      commitment: "confirmed",
-    });
-
-    client = {
-      rpc,
-      rpcSubscriptions,
-      wallet: signer,
-    };
+  if (client) {
+    return client;
   }
+
+  const { rpc, rpcSubscriptions } = createConnections();
+
+  const wallet = await createAndFundWallet(rpc, rpcSubscriptions);
+
+  const estimateAndSetComputeUnitLimit = createComputeUnitEstimator(rpc);
+  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+    rpc,
+    rpcSubscriptions,
+  });
+
+  client = {
+    estimateAndSetComputeUnitLimit,
+    sendAndConfirmTransaction,
+    rpc,
+    rpcSubscriptions,
+    wallet,
+  };
+
   return client;
 }

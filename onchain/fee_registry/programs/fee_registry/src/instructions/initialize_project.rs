@@ -9,8 +9,7 @@ use anchor_spl::token_2022::spl_token_2022::extension::ExtensionType;
 use anchor_spl::token_2022::spl_token_2022::instruction::AuthorityType;
 use anchor_spl::token_2022::spl_token_2022::pod::PodMint;
 use anchor_spl::token_2022::{
-    initialize_mint, initialize_mint2, set_authority, InitializeMint, InitializeMint2,
-    SetAuthority, Token2022,
+    initialize_mint2, set_authority, InitializeMint2, SetAuthority, Token2022,
 };
 use anchor_spl::token_interface::spl_token_metadata_interface::state::TokenMetadata;
 use anchor_spl::token_interface::{
@@ -31,22 +30,26 @@ pub fn _initialize_project(
     let mint_size =
         ExtensionType::try_calculate_account_len::<PodMint>(&[ExtensionType::TransferFeeConfig])?;
 
-    msg!("zadara");
     let lamports = Rent::get()?.minimum_balance(mint_size);
 
+    let owner_key = owner.key();
+    let mint_seeds: &[&[&[u8]]] = &[&[MINT_ACCOUNT_SEED, owner_key.as_ref(), &[ctx.bumps.mint]]];
+
+    // Escalated privileges?
     create_account(
-        CpiContext::new(
+        CpiContext::new_with_signer(
             ctx.accounts.system_program.to_account_info(),
             CreateAccount {
                 from: ctx.accounts.owner.to_account_info(),
                 to: ctx.accounts.mint.to_account_info(),
             },
+            mint_seeds,
         ),
         lamports,
         mint_size as u64,
         &owner.key(),
     )?;
-    msg!("zadara");
+    msg!("i towa shte mine");
 
     transfer_fee_initialize(
         CpiContext::new_with_signer(
@@ -55,11 +58,7 @@ pub fn _initialize_project(
                 token_program_id: ctx.accounts.token_program.to_account_info(),
                 mint: ctx.accounts.mint.to_account_info(),
             },
-            &[&[
-                MINT_ACCOUNT_SEED,
-                ctx.accounts.owner.key().as_ref(),
-                &[ctx.bumps.mint],
-            ]],
+            mint_seeds,
         ),
         Some(&ctx.accounts.mint_auth_pda.key()),
         Some(&ctx.accounts.withdraw_auth.key()),
@@ -68,8 +67,6 @@ pub fn _initialize_project(
     )?;
     msg!("zadara");
 
-    let owner_key = owner.key();
-    let mint_seeds: &[&[&[u8]]] = &[&[MINT_ACCOUNT_SEED, owner_key.as_ref(), &[ctx.bumps.mint]]];
     let mint_auth_key = ctx.accounts.mint_auth_pda.key();
     let freeze_auth_key = ctx.accounts.freeze_auth_pda.key();
 

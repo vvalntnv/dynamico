@@ -4,7 +4,6 @@ mod state;
 
 use anchor_lang::prelude::*;
 
-use instructions::initialize_project::TokenMeta;
 use instructions::*;
 
 declare_id!("Fp2dJXnfZZQF7b4aQ9124rTkFHBGLSTa3NrSR1dTu2Fg");
@@ -13,11 +12,7 @@ declare_id!("Fp2dJXnfZZQF7b4aQ9124rTkFHBGLSTa3NrSR1dTu2Fg");
 pub mod fee_registry {
     use super::*;
 
-    pub fn initialize_project(
-        ctx: Context<InitializeProjectContext>,
-        token_meta: TokenMeta,
-        max_fee: u64,
-    ) -> Result<()> {
-        instructions::_initialize_project(ctx, token_meta, max_fee)
+    pub fn initialize_project(ctx: Context<InitializeProjectContext>, max_fee: u64) -> Result<()> {
+        instructions::_initialize_project(ctx, max_fee)
     }
 }

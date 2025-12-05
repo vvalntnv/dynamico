@@ -22,14 +22,7 @@ describe("fee_registry", () => {
 
     try {
       const sig = await program.methods
-        .initializeProject(
-          {
-            name: "VikiToken",
-            symbol: "VIK",
-            uri: "https://some-uri.vik/alabalanica.json",
-          },
-          new anchor.BN(1000000)
-        )
+        .initializeProject(new anchor.BN(1000000))
         .accounts({
           owner: tokensOwner.publicKey,
         })
@@ -39,8 +32,9 @@ describe("fee_registry", () => {
       console.log("Your transaction signature", sig);
     } catch (err) {
       console.log("PeePee PooPoo man");
+      console.log(err);
 
-      console.log(await err.getLogs());
+      // console.log(await err.getLogs());
       throw err;
     }
 

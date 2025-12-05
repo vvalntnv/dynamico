@@ -15,4 +15,10 @@ pub mod fee_registry {
     pub fn initialize_project(ctx: Context<InitializeProjectContext>, max_fee: u64) -> Result<()> {
         instructions::_initialize_project(ctx, max_fee)
     }
+
+    pub fn withdraw_fees<'info>(
+        ctx: Context<'info, 'info, 'info, 'info, WithdrawFeesContext<'info>>,
+    ) -> Result<()> {
+        instructions::_withdraw_fees(ctx)
+    }
 }
